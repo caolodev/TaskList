@@ -4,10 +4,13 @@ import TaskForm from "./TaskForm.jsx";
 import TaskHeader from "./TaskHeader.jsx";
 import TaskList from "./TaskList.jsx";
 import TaskStatistics from "./TaskStatistics.jsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster, toast } from "sonner";
 const TaskApp = () => {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState(() => {
+    const savedTask = localStorage.getItem("Tasks");
+    return savedTask ? JSON.parse(savedTask) : [];
+  });
   const [filter, setFilter] = useState("todos");
 
   const addTask = (e, textToSave) => {
@@ -35,6 +38,10 @@ const TaskApp = () => {
     toast.success("tarefa adicionada com sucesso");
   };
 
+  useEffect(() => {
+    localStorage.setItem("Tasks", JSON.stringify(tasks));
+  }, [tasks]);
+
   const removeTask = (idToRemove) => {
     setTasks((prev) => prev.filter(({ id }) => id !== idToRemove));
     toast.error("Tarefa deletada com sucesso", {
@@ -54,8 +61,8 @@ const TaskApp = () => {
     );
   };
 
-  const lenghtPending = tasks.filter(({ done }) => done === false).length;
-  const lenghtDone = tasks.filter(({ done }) => done === true).length;
+  const lengthPending = tasks.filter(({ done }) => done === false).length;
+  const lengthDone = tasks.filter(({ done }) => done === true).length;
   const filtered = tasks.filter((item) => {
     if (filter === "todos") return item;
     if (filter === "pendentes") return item.done === false;
@@ -68,8 +75,8 @@ const TaskApp = () => {
       <TaskHeader />
       {tasks.length > 0 && (
         <TaskStatistics
-          done={lenghtDone}
-          pending={lenghtPending}
+          done={lengthDone}
+          pending={lengthPending}
           full={tasks.length}
         />
       )}
